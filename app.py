@@ -1,8 +1,14 @@
 from tkinter import *
+from tkinter import filedialog
 from PIL import Image, ImageDraw
+from MLmodule import check_signature, make_new_model
 
 
 class App:
+    signature_from_file = None
+    signature_from_canvas = None
+    username = ""
+    result = False
     mouse_left_button = 'up'
     mouse_right_button = 'up'
     mouse_x, mouse_y = None, None
@@ -27,10 +33,29 @@ class App:
             self.mouse_x, self.mouse_y = event.x, event.y
 
     def log_in(self):
-        print(self.signature)
+        if self.username is not "":
+            if self.signature_from_file is not None:
+                self.result = check_signature(
+                    self.signature_from_file, self.username)
+            elif self.signature_from_canvas is not None:
+                self.result = check_signature(
+                    self.signature_from_file, self.username)
+
+            if self.result is True:
+                print("login succes")
+            else:
+                print("wrong signature")
+        else:
+            print("no username")
 
     def load_img(self):
-        return 0
+        path = filedialog.askopenfilename(filetypes=(
+            ("PNG files", "*.png"), ("JPG files", "*.jpg")))
+        self.signature_from_file = Image.open(path)
+        self.signature_from_file.show()
+
+    def make_new_user(self):
+        print("new user")
 
     def __init__(self, root):
         root.geometry("1000x500")
@@ -38,6 +63,9 @@ class App:
         root.resizable(0, 0)
         # controlls
         controls = Frame(root, padx=5, pady=5)
+        new_user_button = Button(
+            controls, text="Make new user", command=self.make_new_user)
+        new_user_button.pack()
         username_label = Label(controls, text='Username')
         username_label.pack()
         username_area = Entry(controls)
@@ -50,9 +78,9 @@ class App:
 
         controls.pack(side=LEFT)
         # canvas
-        self.signature = Image.new(
+        self.signature_from_canvas = Image.new(
             "RGB", (self.WIDTH, self.HEIGHT), (255, 255, 255))
-        self.draw = ImageDraw.Draw(self.signature)
+        self.draw = ImageDraw.Draw(self.signature_from_canvas)
 
         write_canvas = Canvas(root, width=self.WIDTH,
                               height=self.HEIGHT, bg='white')
