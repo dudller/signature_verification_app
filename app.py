@@ -27,6 +27,7 @@ class App:
         self.write_canvas.postscript(file='temp' + '.eps')
 
     def motion(self, event=None):
+        """capture motion and draw on canvas"""
         if self.mouse_left_button is 'down':
             if self.mouse_y is not None and self.mouse_x is not None:
                 event.widget.create_line(
@@ -35,6 +36,7 @@ class App:
             self.mouse_x, self.mouse_y = event.x, event.y
 
     def log_in(self):
+        """log in with username and provided signature"""
         if self.username is not None:
             if self.signature_from_file is not None:
                 self.result = check_signature(
@@ -89,10 +91,6 @@ class App:
     def make_new_user(self):
         if len(self.images) is not 0:
             result = make_new_model(self.images, self.username.get())
-        if result:
-            print('done')
-        else:
-            print("nah nah nah")
 
     def __init__(self, root):
         EpsImagePlugin.gs_windows_binary = 'C:/Program Files/gs/gs9.53.3/bin/gswin64c'

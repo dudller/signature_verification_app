@@ -11,24 +11,30 @@ N_OF_TRAIN_HOGS_2 = 20
 
 
 def preprocess(img_list=[]):
-
+    # if theres more than one image to preprocess
     if isinstance(img_list, list):
         output = []
         for img in img_list:
+            # grayscale image
             img_grayscale = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            # scale size of image
             img_resized = cv2.resize(
                 img_grayscale, (700, 350), interpolation=cv2.INTER_AREA)
+            # thresholding
             _, otsu = cv2.threshold(
                 img_resized, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+            # fourier transform
             dft = cv2.dft(np.float32(otsu), flags=cv2.DFT_COMPLEX_OUTPUT)
             dft_shift = np.fft.fftshift(dft)
             magnitude_spectrum = 20 * \
                 np.log(cv2.magnitude(dft_shift[:, :, 0], dft_shift[:, :, 1]))
+            # histogram of oriented gradients
             fft_hog = hog(magnitude_spectrum, orientations=8, pixels_per_cell=(8, 8),
                           cells_per_block=(2, 2), multichannel=False, block_norm='L2-Hys', feature_vector=True)
 
             output.append(fft_hog)
         return output
+    # same as above but for one image
     else:
         img_grayscale = cv2.cvtColor(img_list, cv2.COLOR_BGR2GRAY)
         img_resized = cv2.resize(
@@ -45,6 +51,7 @@ def preprocess(img_list=[]):
 
 
 def check_signature(img, username):
+    """load model from a file named <username>.joblib and use it to check if provided signature is true"""
     descriptor = preprocess(img)
     path = "users/{}.joblib".format(username)
     model = load(path)
@@ -54,6 +61,7 @@ def check_signature(img, username):
 
 
 def make_new_model(img_list, username):
+    """train new model with images provided in img_list, and save it to file <username>.joblib """
     train_hogs = np.load('training/training_features.npz',
                          allow_pickle=True)['arr_0']
     try:
